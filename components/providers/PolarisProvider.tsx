@@ -1,10 +1,17 @@
-import { useCallback } from "react";
+import { useCallback, ReactNode } from "react";
 import { AppProvider } from "@shopify/polaris";
 import { useNavigate } from "@shopify/app-bridge-react";
 import "@shopify/polaris/build/esm/styles.css";
 import { getPolarisTranslations } from "../../utils/i18nUtils";
 
-function AppBridgeLink({ url, children, external, ...rest }) {
+interface AppBridgeLinkProps {
+  readonly url: string;
+  readonly children?: React.ReactNode;
+  readonly external?: boolean;
+  readonly [key: string]: any;
+}
+
+function AppBridgeLink({ url, children, external, ...rest }: Readonly<AppBridgeLinkProps>) {
   const navigate = useNavigate();
   const handleClick = useCallback(() => {
     navigate(url);
@@ -21,9 +28,9 @@ function AppBridgeLink({ url, children, external, ...rest }) {
   }
 
   return (
-    <a {...rest} onClick={handleClick}>
+    <button {...rest} onClick={handleClick} onKeyUp={(e) => { if (e.key === 'Enter') handleClick(); }}>
       {children}
-    </a>
+    </button>
   );
 }
 
@@ -47,8 +54,13 @@ function AppBridgeLink({ url, children, external, ...rest }) {
  * PolarisProvider also passes translations to Polaris.
  *
  */
-export function PolarisProvider({ children }) {
-  const translations = getPolarisTranslations();
+
+interface PolarisProviderProps {
+  children: ReactNode;
+}
+
+export function PolarisProvider({ children }: Readonly<PolarisProviderProps>) {
+  const translations = getPolarisTranslations() || {};
 
   return (
     <AppProvider i18n={translations} linkComponent={AppBridgeLink}>

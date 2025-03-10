@@ -1,4 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, ReactNode } from "react";
+
+declare global {
+  interface Window {
+    __SHOPIFY_DEV_HOST?: string;
+  }
+}
 import { useLocation, useNavigate } from "react-router-dom";
 import { Provider } from "@shopify/app-bridge-react";
 import { Banner, Layout, Page } from "@shopify/polaris";
@@ -12,12 +18,13 @@ import { Banner, Layout, Page } from "@shopify/polaris";
  *
  * See: https://shopify.dev/apps/tools/app-bridge/getting-started/using-react
  */
-export function AppBridgeProvider({ children }) {
+
+export function AppBridgeProvider({ children }: Readonly<{ children: ReactNode }>) {
   const location = useLocation();
   const navigate = useNavigate();
   const history = useMemo(
     () => ({
-      replace: (path) => {
+      replace: (path: string) => {
         navigate(path, { replace: true });
       },
     }),
@@ -37,13 +44,13 @@ export function AppBridgeProvider({ children }) {
   const [appBridgeConfig] = useState(() => {
     const host =
       new URLSearchParams(location.search).get("host") ||
-      window.__SHOPIFY_DEV_HOST;
+      window.__SHOPIFY_DEV_HOST || '';
 
     window.__SHOPIFY_DEV_HOST = host;
 
     return {
       host,
-      apiKey: process.env.SHOPIFY_API_KEY,
+      apiKey: process.env.SHOPIFY_API_KEY || '',
       forceRedirect: true,
     };
   });

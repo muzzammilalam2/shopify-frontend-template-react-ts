@@ -37,7 +37,7 @@ if (host === "localhost") {
   hmrConfig = {
     protocol: "wss",
     host: host,
-    port: process.env.FRONTEND_PORT,
+    port: process.env.FRONTEND_PORT ? parseInt(process.env.FRONTEND_PORT, 10) : undefined,
     clientPort: 443,
   };
 }
@@ -53,7 +53,7 @@ export default defineConfig({
   },
   server: {
     host: "localhost",
-    port: process.env.FRONTEND_PORT,
+    port: process.env.FRONTEND_PORT ? parseInt(process.env.FRONTEND_PORT, 10) : undefined,
     hmr: hmrConfig,
     proxy: {
       "^/(\\?.*)?$": proxyOptions,

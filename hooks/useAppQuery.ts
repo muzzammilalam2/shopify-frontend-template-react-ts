@@ -14,7 +14,13 @@ import { useQuery } from "react-query";
  *
  * @returns Return value of useQuery.  See: https://react-query.tanstack.com/reference/useQuery.
  */
-export const useAppQuery = ({ url, fetchInit = {}, reactQueryOptions }) => {
+interface UseAppQueryOptions {
+  url: string;
+  fetchInit?: RequestInit;
+  reactQueryOptions?: any; // Replace 'any' with the appropriate type if known
+}
+
+export const useAppQuery = ({ url, fetchInit = {}, reactQueryOptions }: UseAppQueryOptions) => {
   const authenticatedFetch = useAuthenticatedFetch();
   const fetch = useMemo(() => {
     return async () => {

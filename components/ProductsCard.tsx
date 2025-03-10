@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next";
 import { useAppQuery, useAuthenticatedFetch } from "../hooks";
 
 export function ProductsCard() {
-  const emptyToastProps = { content: null };
+  const emptyToastProps = { content: "", error: false };
   const [isLoading, setIsLoading] = useState(true);
-  const [toastProps, setToastProps] = useState(emptyToastProps);
+  const [toastProps, setToastProps] = useState<{ content: string; error: boolean }>(emptyToastProps);
   const fetch = useAuthenticatedFetch();
   const { t } = useTranslation();
   const productsCount = 5;
@@ -40,6 +40,7 @@ export function ProductsCard() {
         content: t("ProductsCard.productsCreatedToast", {
           count: productsCount,
         }),
+        error: false,
       });
     } else {
       setIsLoading(false);

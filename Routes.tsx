@@ -14,13 +14,20 @@ import { Routes as ReactRouterRoutes, Route } from "react-router-dom";
  *
  * @return {Routes} `<Routes/>` from React Router, with a `<Route/>` for each file in `pages`
  */
-export default function Routes({ pages }) {
+interface Pages {
+  [key: string]: {
+    default: React.ComponentType<any>;
+  };
+}
+
+export default function Routes({ pages }: Readonly<{ pages: Pages }>) {
   const routes = useRoutes(pages);
   const routeComponents = routes.map(({ path, component: Component }) => (
     <Route key={path} path={path} element={<Component />} />
   ));
 
-  const NotFound = routes.find(({ path }) => path === "/notFound").component;
+  const NotFoundRoute = routes.find(({ path }) => path === "/notFound");
+  const NotFound = NotFoundRoute ? NotFoundRoute.component : () => <div>Not Found</div>;
 
   return (
     <ReactRouterRoutes>
@@ -30,24 +37,19 @@ export default function Routes({ pages }) {
   );
 }
 
-function useRoutes(pages) {
+interface Route {
+  path: string;
+  component: React.ComponentType<any>;
+}
+
+function useRoutes(pages: Readonly<Pages>): Route[] {
   const routes = Object.keys(pages)
-    .map((key) => {
+    .map((key): Route | null => {
       let path = key
         .replace("./pages", "")
         .replace(/\.(t|j)sx?$/, "")
-        /**
-         * Replace /index with /
-         */
         .replace(/\/index$/i, "/")
-        /**
-         * Only lowercase the first letter. This allows the developer to use camelCase
-         * dynamic paths while ensuring their standard routes are normalized to lowercase.
-         */
         .replace(/\b[A-Z]/, (firstLetter) => firstLetter.toLowerCase())
-        /**
-         * Convert /[handle].jsx and /[...handle].jsx to /:handle.jsx for react-router-dom
-         */
         .replace(/\[(?:[.]{3})?(\w+?)\]/g, (_match, param) => `:${param}`);
 
       if (path.endsWith("/") && path !== "/") {
@@ -56,6 +58,7 @@ function useRoutes(pages) {
 
       if (!pages[key].default) {
         console.warn(`${key} doesn't export a default React component`);
+        return null;
       }
 
       return {
@@ -63,7 +66,7 @@ function useRoutes(pages) {
         component: pages[key].default,
       };
     })
-    .filter((route) => route.component);
+    .filter((route): route is Route => route !== null);
 
   return routes;
 }
